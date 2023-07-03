@@ -62,6 +62,8 @@ function Navbar() {
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   onKeyDown={(e) => submitSearch(e)}
+                  autoFocus
+                  onBlur={() => setSearch(false)}
                   className="px-3 py-1 rounded-lg bg-[#f5f5f7] outline-none"
                 />
               ) : (
@@ -71,18 +73,18 @@ function Navbar() {
                 />
               )}
             </div>
-            <div className="flex items-center">
+            <div className="items-center hidden md:flex">
               <Link to="wishlist">
                 <FaStar />
               </Link>
               {wishlistCount}
             </div>
-            <div>
+            <div className="items-center hidden md:flex">
               <Link to="account">
                 <FaUser />
               </Link>
             </div>
-            <div className="flex items-center">
+            <div className="items-center hidden md:flex">
               <Link to="/bag">
                 <FaShoppingBag />
               </Link>{" "}
@@ -95,6 +97,7 @@ function Navbar() {
                     dispatch(logout());
                     dispatch(clearCart());
                     dispatch(clearWishlist());
+                    navigate("/");
                   }}
                 >
                   <FaArrowRight />

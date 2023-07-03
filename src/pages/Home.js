@@ -32,7 +32,7 @@ function Home() {
       {/* <div className='text-xs mb-4 sticky top-[7.6rem]'>
         SORT BY
       </div> */}
-      <div className="flex flex-wrap">
+      <div className="flex flex-wrap justify-center ">
         {searchText === ""
           ? filteredData.map((product) => (
               <ProductCard key={product.id} product={product} />
