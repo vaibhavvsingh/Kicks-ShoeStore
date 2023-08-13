@@ -85,7 +85,7 @@ function Navbar() {
 
   useEffect(() => {
     const wishList = JSON.parse(localStorage.getItem("wishlist"));
-    wishList.forEach((element) => {
+    wishList?.forEach((element) => {
       dispatch(addToWishlist(element));
     });
   }, [dispatch]);
