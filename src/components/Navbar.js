@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FaBars,
   FaSearch,
@@ -10,10 +10,11 @@ import {
 import Dropdown from "./Dropdown";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../store/userSlice";
-import { clearCart } from "../store/cartSlice";
+import { login, logout } from "../store/userSlice";
+import { clearCart, getCart } from "../store/cartSlice";
 import { clearWishlist } from "../store/wishlistSlice";
 import { changeSearch } from "../store/searchSlice";
+import { ToastContainer, toast } from "react-toastify";
 
 function Navbar() {
   const [search, setSearch] = useState(false);
@@ -21,6 +22,7 @@ function Navbar() {
   const [dropdown, setDropdown] = useState(false);
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  const userid = useSelector((state) => state.user.userid);
   const cartCount = useSelector((state) => {
     return state.cart?.length;
   });
@@ -28,16 +30,64 @@ function Navbar() {
     return state.wishlist?.length;
   });
   const navigate = useNavigate();
+
   function submitSearch(e) {
     if (e.key === "Enter") {
       navigate("/");
       dispatch(changeSearch(searchText));
     }
   }
+  async function logoutHandle() {
+    const response = await fetch("http://localhost:3500/user/logout", {
+      credentials: "include",
+    });
+    const data = await response.json();
+    toast.success(data.message, { position: toast.POSITION.BOTTOM_CENTER });
+    dispatch(logout());
+    localStorage.removeItem("user");
+    dispatch(clearCart());
+    dispatch(clearWishlist());
+    navigate("/");
+  }
+  const getCartData = useCallback(
+    async function () {
+      try {
+        const response = await fetch(
+          "http://localhost:3500/cart?userid=" + userid,
+          {
+            mode: "cors",
+            credentials: "include",
+          }
+        );
+        const items = await response.json();
+        if (response.status === 200) {
+          dispatch(getCart(items));
+        } else {
+          toast.error("Could not fetch cart info.\n" + items.message, {
+            position: toast.POSITION.BOTTOM_CENTER,
+          });
+        }
+      } catch (err) {
+        toast.error("Could not fetch cart info.\n" + err.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      }
+    },
+    [userid, dispatch]
+  );
+  useEffect(() => {
+    let user = localStorage.getItem("user");
+    user = JSON.parse(user);
+    if (user && user.isLoggedIn) {
+      dispatch(login(user));
+    }
+    if (isLoggedIn) getCartData();
+  }, [getCartData, isLoggedIn, dispatch]);
 
   return (
     <>
-      <div className="sticky top-0 bg-white">
+      <div className="sticky top-0 bg-white z-10">
+        <ToastContainer />
         <div className="flex items-center justify-between px-4 py-4">
           <div className="w-[33%]">
             <FaBars
@@ -92,21 +142,14 @@ function Navbar() {
             </div>
             {isLoggedIn && (
               <div>
-                <button
-                  onClick={() => {
-                    dispatch(logout());
-                    dispatch(clearCart());
-                    dispatch(clearWishlist());
-                    navigate("/");
-                  }}
-                >
+                <button onClick={logoutHandle}>
                   <FaArrowRight />
                 </button>
               </div>
             )}
           </div>
         </div>
-        <div className="flex justify-center gap-20 p-1 pb-3 text-xs">
+        <div className="flex justify-center gap-10 sm:gap-20 p-1 pb-3 text-xs">
           <div className="hover:font-semibold">
             <Link to="/footwear">FOOTWEAR</Link>
           </div>
@@ -118,7 +161,7 @@ function Navbar() {
           </div>
         </div>
       </div>
-      {dropdown && <Dropdown />}
+      <Dropdown dropdown={dropdown} />
     </>
   );
 }

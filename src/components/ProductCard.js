@@ -5,10 +5,10 @@ function ProductCard({ product }) {
   return (
     <div className="w-[100%] p-4 sm:w-[50%] lg:w-[300px]">
       <Link to={`/product/${product.id}`}>
-        <img src={product.image} alt="product" />
-        <p>NIKE</p>
-        <p className="font-semibold">{product.name.replaceAll("-", " ")}</p>
-        <p>Rs. {product.currentPrice}.00</p>
+        <img src={product.img} alt="product" />
+        <p>{product.brand.toUpperCase()}</p>
+        <p className="font-semibold">{product.name}</p>
+        <p>Rs. {product.price}.00</p>
       </Link>
     </div>
   );

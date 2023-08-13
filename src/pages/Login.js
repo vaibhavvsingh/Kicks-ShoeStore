@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../store/userSlice";
 import { useSelector, useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
 
 function Login() {
   const [loginInfo, setLoginInfo] = useState({
-    email: "",
+    username: "",
     password: "",
   });
   const [registerInfo, setRegisterInfo] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    mobile: "",
+    username: "",
     password: "",
   });
 
@@ -27,18 +28,54 @@ function Login() {
     // eslint-disable-next-line
   }, []);
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
     //API CALL TO LOGIN
-    dispatch(login(loginInfo));
-    navigate("/");
+    try {
+      const response = await fetch("http://localhost:3500/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginInfo),
+        mode: "cors",
+        credentials: "include",
+      });
+      const data = await response.json();
+      toast.success(data.message);
+      if (response.status === 200) {
+        dispatch(login({ username: loginInfo.username, userid: data.userid }));
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            isLoggedIn: true,
+            username: loginInfo.username,
+            userid: data.userid,
+          })
+        );
+        navigate("/");
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
-  function handleRegister(e) {
+  async function handleRegister(e) {
     e.preventDefault();
     //API CALL TO REGISTER
+    const response = await fetch("http://localhost:3500/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(registerInfo),
+      mode: "cors",
+    });
+    const data = await response.json();
+    toast(data?.message);
   }
   return (
     <div className="md:w-[60%] m-auto p-10 text-sm">
+      <ToastContainer />
       <h1 className="font-bold mb-4">SIGN IN / JOIN</h1>
       <form
         className="flex flex-col mb-14"
@@ -48,12 +85,12 @@ function Login() {
         <h1 className="mb-2">SIGN IN</h1>
         <input
           type="text"
-          placeholder="EMAIL"
+          placeholder="USERNAME"
           className="p-1 my-1 w-full"
-          value={loginInfo.email}
+          value={loginInfo.username}
           onChange={(e) =>
             setLoginInfo((state) => {
-              return { ...state, email: e.target.value };
+              return { ...state, username: e.target.value };
             })
           }
         />
@@ -119,13 +156,13 @@ function Login() {
           }
         />
         <input
-          type="tel"
-          placeholder="MOBILE"
+          type="text"
+          placeholder="USERNAME"
           className="p-1 my-1 w-full"
-          value={registerInfo.mobile}
+          value={registerInfo.username}
           onChange={(e) =>
             setRegisterInfo((state) => {
-              return { ...state, mobile: e.target.value };
+              return { ...state, username: e.target.value };
             })
           }
         />

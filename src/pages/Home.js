@@ -1,52 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
-import { data } from "../mock/products";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 function Home() {
   const param = useParams();
-  // console.log(param);
   const searchText = useSelector((state) => state.search);
-  // console.log(searchText)
-  let filteredData = data.hydratedProducts;
+  const [data, setData] = useState([]);
 
-  if (param?.type === "footwear") {
-    filteredData = data.hydratedProducts.filter(
-      (product) => product.category === "FOOTWEAR"
-    );
+  async function getData() {
+    try {
+      const response = await fetch("http://localhost:3500/product");
+      const results = await response.json();
+      if (response.status === 200) setData(results);
+      else
+        toast("Could not fetch Products data\n" + results.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+    } catch (err) {
+      toast("Could not fetch Products data.\n" + err.message, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+    }
   }
-  if (param?.type === "apparel") {
-    filteredData = data.hydratedProducts.filter(
-      (product) => product.category === "APPAREL"
-    );
-  }
-  if (param?.type === "accessories") {
-    filteredData = data.hydratedProducts.filter(
-      (product) => product.category === "ACCESSORIES"
-    );
-  }
+
+  useEffect(() => {
+    getData();
+  }, [searchText]);
 
   return (
     <div className="px-8 py-4">
-      {/* <div className='text-xs mb-4 sticky top-[7.6rem]'>
-        SORT BY
-      </div> */}
+      <ToastContainer />
       <div className="flex flex-wrap justify-center ">
-        {searchText === ""
-          ? filteredData.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))
-          : filteredData
-              .filter((product) =>
-                product.name
-                  .replaceAll("-", " ")
-                  .toLowerCase()
-                  .includes(searchText.toLowerCase())
-              )
-              .map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+        {data
+          .filter((product) => {
+            return (
+              product.name.toLowerCase().includes(searchText.toLowerCase()) &&
+              (!param?.type ||
+                param.type.toLowerCase() === product.category.toLowerCase())
+            );
+          })
+          .map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
       </div>
     </div>
   );
