@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCart } from "../store/cartSlice";
 import { addToWishlist } from "../store/wishlistSlice";
 import { toast } from "react-toastify";
+import backendUrl from "../static/constants";
 
 function Product() {
   const params = useParams();
@@ -17,7 +18,7 @@ function Product() {
 
   async function addToCartHandler() {
     if (user.isLoggedIn) {
-      const response = await fetch("http://localhost:3500/cart", {
+      const response = await fetch(backendUrl + "cart", {
         method: "post",
         credentials: "include",
         headers: {
@@ -85,9 +86,7 @@ function Product() {
   }
   const getData = useCallback(async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3500/product?id=" + params.id
-      );
+      const response = await fetch(backendUrl + "product?id=" + params.id);
       const results = await response.json();
       setProduct(results[0]);
     } catch (err) {

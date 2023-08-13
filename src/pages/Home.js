@@ -3,6 +3,7 @@ import ProductCard from "../components/ProductCard";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import backendUrl from "../static/constants";
 
 function Home() {
   const param = useParams();
@@ -11,7 +12,7 @@ function Home() {
 
   async function getData() {
     try {
-      const response = await fetch("http://localhost:3500/product");
+      const response = await fetch(backendUrl + "product");
       const results = await response.json();
       if (response.status === 200) setData(results);
       else

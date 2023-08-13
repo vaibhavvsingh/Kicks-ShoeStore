@@ -1,7 +1,28 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import backendUrl from "../static/constants";
+import { toast } from "react-toastify";
+import { logout } from "../store/userSlice";
+import { clearCart } from "../store/cartSlice";
+import { clearWishlist } from "../store/wishlistSlice";
 
 function Dropdown({ dropdown }) {
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  async function logoutHandle() {
+    const response = await fetch(backendUrl + "user/logout", {
+      credentials: "include",
+    });
+    const data = await response.json();
+    toast.success(data.message, { position: toast.POSITION.BOTTOM_CENTER });
+    dispatch(logout());
+    localStorage.removeItem("user");
+    dispatch(clearCart());
+    dispatch(clearWishlist());
+    navigate("/");
+  }
   return (
     <div
       className={
@@ -14,7 +35,11 @@ function Dropdown({ dropdown }) {
       </div>
       <hr />
       <div>
-        <Link to="/login">SIGN IN/JOIN</Link>
+        {!isLoggedIn ? (
+          <Link to="/login">SIGN IN/JOIN</Link>
+        ) : (
+          <p onClick={logoutHandle}></p>
+        )}
       </div>
       <hr />
       <div>
@@ -26,16 +51,6 @@ function Dropdown({ dropdown }) {
       <div>
         <Link to="/bag">BAG</Link>
       </div>
-      {/* <div>ABOUT US</div>
-        <div>CONTACT</div>
-        <div>SHIPPING INFORMATION</div>
-        <div>RETURN AND EXCHANGE</div>
-        <div>LEGAL</div>
-        <div>CAREERS</div>
-        <hr />
-        <div>SIGN UP FOR OUR NEWSLETTER</div>
-        <div>FOLLOW US ON:</div>
-        <div>FB IG WA</div> */}
     </div>
   );
 }

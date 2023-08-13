@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeFromCart } from "../store/cartSlice";
 import { ToastContainer, toast } from "react-toastify";
+import backendUrl from "../static/constants";
 
 function Bag() {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -12,7 +13,7 @@ function Bag() {
   const dispatch = useDispatch();
 
   async function removeCartItem(id) {
-    const response = await fetch("http://localhost:3500/cart", {
+    const response = await fetch(backendUrl + "cart", {
       method: "delete",
       credentials: "include",
       mode: "cors",

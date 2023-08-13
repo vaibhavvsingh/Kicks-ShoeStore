@@ -12,9 +12,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, logout } from "../store/userSlice";
 import { clearCart, getCart } from "../store/cartSlice";
-import { clearWishlist } from "../store/wishlistSlice";
+import { addToWishlist, clearWishlist } from "../store/wishlistSlice";
 import { changeSearch } from "../store/searchSlice";
 import { ToastContainer, toast } from "react-toastify";
+import backendUrl from "../static/constants";
 
 function Navbar() {
   const [search, setSearch] = useState(false);
@@ -23,6 +24,7 @@ function Navbar() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const userid = useSelector((state) => state.user.userid);
+  const wishlist = useSelector((state) => state.wishlist);
   const cartCount = useSelector((state) => {
     return state.cart?.length;
   });
@@ -38,7 +40,7 @@ function Navbar() {
     }
   }
   async function logoutHandle() {
-    const response = await fetch("http://localhost:3500/user/logout", {
+    const response = await fetch(backendUrl + "user/logout", {
       credentials: "include",
     });
     const data = await response.json();
@@ -52,13 +54,10 @@ function Navbar() {
   const getCartData = useCallback(
     async function () {
       try {
-        const response = await fetch(
-          "http://localhost:3500/cart?userid=" + userid,
-          {
-            mode: "cors",
-            credentials: "include",
-          }
-        );
+        const response = await fetch(backendUrl + "cart?userid=" + userid, {
+          mode: "cors",
+          credentials: "include",
+        });
         const items = await response.json();
         if (response.status === 200) {
           dispatch(getCart(items));
@@ -83,6 +82,17 @@ function Navbar() {
     }
     if (isLoggedIn) getCartData();
   }, [getCartData, isLoggedIn, dispatch]);
+
+  useEffect(() => {
+    const wishList = JSON.parse(localStorage.getItem("wishlist"));
+    wishList.forEach((element) => {
+      dispatch(addToWishlist(element));
+    });
+  }, [dispatch]);
+
+  useEffect(() => {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  }, [wishlist]);
 
   return (
     <>

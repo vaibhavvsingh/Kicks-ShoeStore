@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../store/userSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
+import backendUrl from "../static/constants";
 
 function Login() {
   const [loginInfo, setLoginInfo] = useState({
@@ -32,7 +33,7 @@ function Login() {
     e.preventDefault();
     //API CALL TO LOGIN
     try {
-      const response = await fetch("http://localhost:3500/user/login", {
+      const response = await fetch(backendUrl + "user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +63,7 @@ function Login() {
   async function handleRegister(e) {
     e.preventDefault();
     //API CALL TO REGISTER
-    const response = await fetch("http://localhost:3500/user", {
+    const response = await fetch(backendUrl + "user", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
