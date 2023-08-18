@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getCart } from "../store/cartSlice";
-import { addToWishlist } from "../store/wishlistSlice";
+import { getWishlist } from "../store/wishlistSlice";
 import { toast } from "react-toastify";
 import backendUrl from "../static/constants";
 
@@ -68,20 +68,58 @@ function Product() {
       }
     } else navigate("/login");
   }
-  function addToWishlistHandler() {
+  async function addToWishlistHandler() {
     if (user.isLoggedIn) {
-      const tempWishlist = wishlist.filter(
-        (item) => item.productid === product.id
-      );
-      if (tempWishlist.length === 0)
-        dispatch(
-          addToWishlist({
-            ...product,
-            userid: user.userid,
-            productid: product.id,
-            quantity,
-          })
+      const response = await fetch(backendUrl + "wishlist", {
+        method: "post",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "cors",
+        body: JSON.stringify({
+          userid: user.userid,
+          productid: product.id,
+          quantity,
+        }),
+      });
+      const data = await response.json();
+      toast(data.message, { position: toast.POSITION.BOTTOM_CENTER });
+      if (response.status === 200) {
+        const tempWishlist = wishlist.filter(
+          (item) => item.productid === product.id
         );
+        if (tempWishlist.length !== 0) {
+          dispatch(
+            getWishlist(
+              wishlist.map((item) => {
+                if (item.productid === tempWishlist[0].productid) {
+                  return {
+                    ...product,
+                    userid: user.userid,
+                    productid: product.id,
+                    quantity,
+                  };
+                } else {
+                  return item;
+                }
+              })
+            )
+          );
+        } else {
+          dispatch(
+            getWishlist([
+              ...wishlist,
+              {
+                ...product,
+                userid: user.userid,
+                productid: product.id,
+                quantity,
+              },
+            ])
+          );
+        }
+      }
     } else navigate("/login");
   }
   const getData = useCallback(async () => {

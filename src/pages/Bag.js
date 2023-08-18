@@ -40,17 +40,19 @@ function Bag() {
   }, []);
 
   if (!items || !items.length) {
-    return <div className="text-center mt-4 text-2xl">BAG IS EMPTY!</div>;
+    return <div className="text-center mt-4 text-2xl">CART IS EMPTY!</div>;
   }
   return (
     <div className="flex flex-col items-center mt-6 mx-4">
       <ToastContainer />
-      <h1 className="text-2xl">BAG</h1>
+      <h1 className="text-2xl">CART</h1>
       {items?.map((item, index) => (
         <div
           key={index}
-          className="relative flex h-48 w-[100%] sm:w-[80%] md:w-[60%] lg:w-[40%] justify-center items-center rounded-lg my-2 mx-4 shadow-md"
-          // style={{border:"1px solid black"}}
+          className="relative flex h-48 w-[100%] sm:w-[80%] md:w-[60%] lg:w-[40%] justify-center items-center rounded-lg my-2 mx-4 shadow-md cursor-pointer"
+          onClick={() => {
+            navigate("/product/" + item.productid);
+          }}
         >
           <div className="w-[50%] flex justify-center mx-4">
             <img className="h-44 object-contain" src={item.img} alt="" />
@@ -63,7 +65,8 @@ function Bag() {
           </div>
           <div
             className="absolute top-[-10px] right-[-10px] rounded-full text-center bg-red-500 hover:bg-red-700 cursor-pointer w-[25px] h-[25px] text-white"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               removeCartItem(item.id);
             }}
           >

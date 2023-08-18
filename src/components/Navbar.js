@@ -12,7 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, logout } from "../store/userSlice";
 import { clearCart, getCart } from "../store/cartSlice";
-import { addToWishlist, clearWishlist } from "../store/wishlistSlice";
+import { clearWishlist, getWishlist } from "../store/wishlistSlice";
 import { changeSearch } from "../store/searchSlice";
 import { ToastContainer, toast } from "react-toastify";
 import backendUrl from "../static/constants";
@@ -24,7 +24,6 @@ function Navbar() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const userid = useSelector((state) => state.user.userid);
-  const wishlist = useSelector((state) => state.wishlist);
   const cartCount = useSelector((state) => {
     return state.cart?.length;
   });
@@ -74,6 +73,29 @@ function Navbar() {
     },
     [userid, dispatch]
   );
+  const getWishlistData = useCallback(
+    async function () {
+      try {
+        const response = await fetch(backendUrl + "wishlist?userid=" + userid, {
+          mode: "cors",
+          credentials: "include",
+        });
+        const items = await response.json();
+        if (response.status === 200) {
+          dispatch(getWishlist(items));
+        } else {
+          toast.error("Could not fetch wishlist info.\n" + items.message, {
+            position: toast.POSITION.BOTTOM_CENTER,
+          });
+        }
+      } catch (err) {
+        toast.error("Could not fetch wishlist info.\n" + err.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      }
+    },
+    [userid, dispatch]
+  );
   useEffect(() => {
     let user = localStorage.getItem("user");
     user = JSON.parse(user);
@@ -81,18 +103,19 @@ function Navbar() {
       dispatch(login(user));
     }
     if (isLoggedIn) getCartData();
-  }, [getCartData, isLoggedIn, dispatch]);
+    if (isLoggedIn) getWishlistData();
+  }, [getCartData, isLoggedIn, dispatch, getWishlistData]);
 
-  useEffect(() => {
-    const wishList = JSON.parse(localStorage.getItem("wishlist"));
-    wishList?.forEach((element) => {
-      dispatch(addToWishlist(element));
-    });
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const wishList = JSON.parse(localStorage.getItem("wishlist"));
+  //   wishList?.forEach((element) => {
+  //     dispatch(addToWishlist(element));
+  //   });
+  // }, [dispatch]);
 
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+  // useEffect(() => {
+  //   localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  // }, [wishlist]);
 
   return (
     <>

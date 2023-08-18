@@ -43,7 +43,7 @@ function Login() {
         credentials: "include",
       });
       const data = await response.json();
-      toast.success(data.message);
+      toast.success(data.message, { position: toast.POSITION.BOTTOM_CENTER });
       if (response.status === 200) {
         dispatch(login({ username: loginInfo.username, userid: data.userid }));
         localStorage.setItem(
@@ -63,7 +63,7 @@ function Login() {
   async function handleRegister(e) {
     e.preventDefault();
     //API CALL TO REGISTER
-    const response = await fetch(backendUrl + "user", {
+    const response = await fetch(backendUrl + "user/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
