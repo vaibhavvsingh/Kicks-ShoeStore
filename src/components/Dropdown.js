@@ -26,7 +26,7 @@ function Dropdown({ dropdown }) {
   return (
     <div
       className={
-        "fixed bg-white p-4 text-xs flex flex-col gap-5 z-10 md:h-full shadow-md md:w-[250px] transition-all " +
+        "fixed bg-white p-4 text-xs flex flex-col gap-5 z-10 md:h-full shadow-xl shadow-slate-400 md:w-[250px] transition-all " +
         (!dropdown && "translate-x-[-250px]")
       }
     >

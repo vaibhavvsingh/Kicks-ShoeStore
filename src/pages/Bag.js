@@ -1,9 +1,23 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { removeFromCart } from "../store/cartSlice";
+import { clearCart, removeFromCart } from "../store/cartSlice";
 import { ToastContainer, toast } from "react-toastify";
 import backendUrl from "../static/constants";
+
+function loadScript(src) {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = src;
+    document.body.appendChild(script);
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+  });
+}
 
 function Bag() {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -39,41 +53,114 @@ function Bag() {
     // eslint-disable-next-line
   }, []);
 
+  async function deleteAllItems() {
+    const res = await fetch(backendUrl + "cart/all", {
+      method: "delete",
+      credentials: "include",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userid,
+      }),
+    });
+    if (res.status === 200) dispatch(clearCart());
+  }
+  async function displayRazorpay() {
+    const res = await loadScript(
+      "https://checkout.razorpay.com/v1/checkout.js"
+    );
+
+    if (!res) {
+      alert("Razorpay SDK failed to load. Please check if your online");
+      return;
+    }
+
+    const response = await fetch(backendUrl + "razorpay", {
+      method: "POST",
+      credentials: "include",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userid,
+      }),
+    });
+    const data = await response.json();
+
+    const options = {
+      key: "rzp_test_cQBOooxXHP2UNA",
+      amount: data.amount,
+      currency: data.currency,
+      name: "Nike Fashion",
+      description: "Test Transaction",
+      image: "https://www.freeiconspng.com/img/49338",
+      order_id: data.id,
+      handler: () => {
+        toast.success("Payment Succesful!", {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+        deleteAllItems();
+      },
+    };
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
+  }
+
   if (!items || !items.length) {
     return <div className="text-center mt-4 text-2xl">CART IS EMPTY!</div>;
   }
   return (
-    <div className="flex flex-col items-center mt-6 mx-4">
-      <ToastContainer />
-      <h1 className="text-2xl">CART</h1>
-      {items?.map((item, index) => (
-        <div
-          key={index}
-          className="relative flex h-48 w-[100%] sm:w-[80%] md:w-[60%] lg:w-[40%] justify-center items-center rounded-lg my-2 mx-4 shadow-md cursor-pointer"
-          onClick={() => {
-            navigate("/product/" + item.productid);
-          }}
-        >
-          <div className="w-[50%] flex justify-center mx-4">
-            <img className="h-44 object-contain" src={item.img} alt="" />
-          </div>
-          <div className="w-[50%]">
-            <div>{item.name}</div>
-            <div>{item.brand}</div>
-            <div>Rs. {item.price}.00</div>
-            <div>Quantity: {item.quantity}</div>
-          </div>
+    <div className="flex my-6 flex-col md:flex-row max-w-[900px] m-auto">
+      <div className="flex flex-col items-center mx-4 flex-1">
+        <ToastContainer />
+        <h1 className="text-2xl font-semibold">CART</h1>
+        {items?.map((item, index) => (
           <div
-            className="absolute top-[-10px] right-[-10px] rounded-full text-center bg-red-500 hover:bg-red-700 cursor-pointer w-[25px] h-[25px] text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              removeCartItem(item.id);
+            key={index}
+            className="relative flex h-48 w-[100%]  justify-center items-center rounded-lg my-2 mx-4 shadow-md cursor-pointer"
+            onClick={() => {
+              navigate("/product/" + item.productid);
             }}
           >
-            X
+            <div className="w-[50%] flex justify-center mx-4">
+              <img className="h-44 object-contain" src={item.img} alt="" />
+            </div>
+            <div className="w-[50%]">
+              <div>{item.name}</div>
+              <div>{item.brand}</div>
+              <div>Rs. {item.price}.00</div>
+              <div>Quantity: {item.quantity}</div>
+            </div>
+            <div
+              className="absolute top-[-10px] right-[-10px] rounded-full text-center bg-red-500 hover:bg-red-700 cursor-pointer w-[25px] h-[25px] text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                removeCartItem(item.id);
+              }}
+            >
+              X
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      <div className="flex-1 flex flex-col items-center sticky">
+        <h1 className="text-2xl font-semibold">CHECK OUT</h1>
+        <button
+          className="text-white bg-black p-2 rounded-sm mt-4"
+          onClick={displayRazorpay}
+        >
+          Pay ₹
+          {items && Array.isArray(items) && items.length !== 0
+            ? items.reduce((acc, item) => {
+                return acc + item.price * item.quantity;
+              }, 0)
+            : "0"}
+          .00
+        </button>
+      </div>
     </div>
   );
 }
