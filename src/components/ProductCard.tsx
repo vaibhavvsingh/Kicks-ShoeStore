@@ -1,7 +1,11 @@
-import React from "react";
 import { Link } from "react-router-dom";
+import { Product } from "../pages/Home";
 
-function ProductCard({ product }) {
+interface ProductCardProps {
+  product: Product
+}
+
+function ProductCard({ product }: ProductCardProps) {
   return (
     <Link to={`/product/${product.id}`}>
       <img src={product.img} alt="product" />

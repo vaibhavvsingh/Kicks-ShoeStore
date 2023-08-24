@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../store/userSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import backendUrl from "../static/constants";
+import { RootState } from "../store/store";
 
 function Login() {
   const [loginInfo, setLoginInfo] = useState({
@@ -19,7 +20,7 @@ function Login() {
   });
 
   const dispatch = useDispatch();
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,7 +30,7 @@ function Login() {
     // eslint-disable-next-line
   }, []);
 
-  async function handleLogin(e) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
     //API CALL TO LOGIN
     try {
@@ -57,10 +58,11 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      toast.error(err.message);
+      if (err instanceof Error)
+      toast.error(err.message, {position: toast.POSITION.BOTTOM_CENTER});
     }
   }
-  async function handleRegister(e) {
+  async function handleRegister(e: FormEvent) {
     e.preventDefault();
     //API CALL TO REGISTER
     const response = await fetch(backendUrl + "user/register", {

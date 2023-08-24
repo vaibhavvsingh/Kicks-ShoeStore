@@ -1,4 +1,3 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import backendUrl from "../static/constants";
@@ -6,9 +5,13 @@ import { toast } from "react-toastify";
 import { logout } from "../store/userSlice";
 import { clearCart } from "../store/cartSlice";
 import { clearWishlist } from "../store/wishlistSlice";
+import { RootState } from "../store/store";
 
-function Dropdown({ dropdown }) {
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+interface DropdownProps {
+  dropdown: boolean;
+}
+function Dropdown({ dropdown }:DropdownProps) {
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   async function logoutHandle() {

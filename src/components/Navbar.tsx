@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FaBars,
   FaSearch,
@@ -16,23 +16,24 @@ import { clearWishlist, getWishlist } from "../store/wishlistSlice";
 import { changeSearch } from "../store/searchSlice";
 import { ToastContainer, toast } from "react-toastify";
 import backendUrl from "../static/constants";
+import { RootState } from "../store/store";
 
 function Navbar() {
   const [search, setSearch] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [dropdown, setDropdown] = useState(false);
   const dispatch = useDispatch();
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-  const userid = useSelector((state) => state.user.userid);
-  const cartCount = useSelector((state) => {
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const userid = useSelector((state: RootState) => state.user.userid);
+  const cartCount = useSelector((state: RootState) => {
     return state.cart?.length;
   });
-  const wishlistCount = useSelector((state) => {
+  const wishlistCount = useSelector((state: RootState) => {
     return state.wishlist?.length;
   });
   const navigate = useNavigate();
 
-  function submitSearch(e) {
+  function submitSearch(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       navigate("/");
       dispatch(changeSearch(searchText));
@@ -66,6 +67,7 @@ function Navbar() {
           });
         }
       } catch (err) {
+        if(err instanceof Error)
         toast.error("Could not fetch cart info.\n" + err.message, {
           position: toast.POSITION.BOTTOM_CENTER,
         });
@@ -89,6 +91,7 @@ function Navbar() {
           });
         }
       } catch (err) {
+        if(err instanceof Error)
         toast.error("Could not fetch wishlist info.\n" + err.message, {
           position: toast.POSITION.BOTTOM_CENTER,
         });
@@ -97,25 +100,14 @@ function Navbar() {
     [userid, dispatch]
   );
   useEffect(() => {
-    let user = localStorage.getItem("user");
-    user = JSON.parse(user);
+    const userLocalStorage = localStorage.getItem("user");
+    const user = JSON.parse(userLocalStorage as string);
     if (user && user.isLoggedIn) {
       dispatch(login(user));
     }
     if (isLoggedIn) getCartData();
     if (isLoggedIn) getWishlistData();
   }, [getCartData, isLoggedIn, dispatch, getWishlistData]);
-
-  // useEffect(() => {
-  //   const wishList = JSON.parse(localStorage.getItem("wishlist"));
-  //   wishList?.forEach((element) => {
-  //     dispatch(addToWishlist(element));
-  //   });
-  // }, [dispatch]);
-
-  // useEffect(() => {
-  //   localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  // }, [wishlist]);
 
   return (
     <>

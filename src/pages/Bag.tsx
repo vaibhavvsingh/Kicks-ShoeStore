@@ -1,20 +1,21 @@
-import React, { useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearCart, removeFromCart } from "../store/cartSlice";
 import { ToastContainer, toast } from "react-toastify";
 import useRazorpay from "react-razorpay";
 import backendUrl from "../static/constants";
+import { RootState } from "../store/store";
 
 function Bag() {
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-  const userid = useSelector((state) => state.user.userid);
-  const items = useSelector((state) => state.cart);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const userid = useSelector((state: RootState) => state.user.userid);
+  const items = useSelector((state: RootState) => state.cart);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [Razorpay] = useRazorpay();
 
-  async function removeCartItem(id) {
+  async function removeCartItem(id: number) {
     const response = await fetch(backendUrl + "cart", {
       method: "delete",
       credentials: "include",

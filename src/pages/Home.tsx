@@ -1,14 +1,26 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import backendUrl from "../static/constants";
+import { RootState } from "../store/store";
+
+export interface Product {
+  brand: string,
+  category: string,
+  desc: string,
+  id: number,
+  img: string,
+  name: string,
+  price: number,
+  sizes: string
+}
 
 function Home() {
   const param = useParams();
-  const searchText = useSelector((state) => state.search);
-  const [data, setData] = useState([]);
+  const searchText = useSelector((state: RootState) => state.search);
+  const [data, setData] = useState<Product[]>([]);
   // const [page, setPage] = useState(1);
   const page = useRef(1);
   const hasMore = useRef(true);
@@ -29,15 +41,16 @@ function Home() {
           position: toast.POSITION.BOTTOM_CENTER,
         });
     } catch (err) {
-      toast("Could not fetch Products data.\n" + err.message, {
+      if(err instanceof Error)
+      toast("Could not fetch Products data.\n" + err?.message, {
         position: toast.POSITION.BOTTOM_CENTER,
       });
     }
   }, [page, searchText]);
 
-  const observer = useRef();
+  const observer = useRef<IntersectionObserver>();
   const scrollerRef = useCallback(
-    (node) => {
+    (node:HTMLDivElement) => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {

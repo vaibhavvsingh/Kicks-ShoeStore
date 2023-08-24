@@ -1,19 +1,21 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getCart } from "../store/cartSlice";
-import { getWishlist } from "../store/wishlistSlice";
+import { WishlistItem, getWishlist } from "../store/wishlistSlice";
 import { toast } from "react-toastify";
 import backendUrl from "../static/constants";
+import { RootState } from "../store/store";
+import { Product as ProductType } from "./Home";
 
 function Product() {
   const params = useParams();
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const cart = useSelector((state) => state.cart);
-  const wishlist = useSelector((state) => state.wishlist);
+  const user = useSelector((state: RootState) => state.user);
+  const cart = useSelector((state: RootState) => state.cart);
+  const wishlist = useSelector((state: RootState) => state.wishlist);
   const navigate = useNavigate();
-  const [product, setProduct] = useState({});
+  const [product, setProduct] = useState<ProductType>();
   const [quantity, setQuantity] = useState(1);
 
   async function addToCartHandler() {
@@ -27,14 +29,14 @@ function Product() {
         mode: "cors",
         body: JSON.stringify({
           userid: user.userid,
-          productid: product.id,
+          productid: product?.id,
           quantity,
         }),
       });
       const data = await response.json();
       toast(data.message, { position: toast.POSITION.BOTTOM_CENTER });
       if (response.status === 200) {
-        const tempCart = cart.filter((item) => item.productid === product.id);
+        const tempCart = cart.filter((item) => item.productid === product?.id);
         if (tempCart.length !== 0) {
           dispatch(
             getCart(
@@ -43,7 +45,7 @@ function Product() {
                   return {
                     ...product,
                     userid: user.userid,
-                    productid: product.id,
+                    productid: product?.id,
                     quantity,
                   };
                 } else {
@@ -59,7 +61,7 @@ function Product() {
               {
                 ...product,
                 userid: user.userid,
-                productid: product.id,
+                productid: product?.id,
                 quantity,
               },
             ])
@@ -79,7 +81,7 @@ function Product() {
         mode: "cors",
         body: JSON.stringify({
           userid: user.userid,
-          productid: product.id,
+          productid: product?.id,
           quantity,
         }),
       });
@@ -87,7 +89,7 @@ function Product() {
       toast(data.message, { position: toast.POSITION.BOTTOM_CENTER });
       if (response.status === 200) {
         const tempWishlist = wishlist.filter(
-          (item) => item.productid === product.id
+          (item: WishlistItem) => item.productid === product?.id
         );
         if (tempWishlist.length === 0) {
           dispatch(
@@ -96,7 +98,7 @@ function Product() {
               {
                 ...product,
                 userid: user.userid,
-                productid: product.id,
+                productid: product?.id,
                 quantity,
               },
             ])
@@ -111,6 +113,7 @@ function Product() {
       const results = await response.json();
       setProduct(results[0]);
     } catch (err) {
+      if (err instanceof Error)
       toast(err.message, { position: toast.POSITION.BOTTOM_CENTER });
     }
   }, [params.id]);
@@ -132,8 +135,8 @@ function Product() {
           Sizes: <br />
         </p>
         <p className="flex flex-wrap">
-          {product.sizes &&
-            JSON.parse(product?.sizes).map((item) => (
+          {product?.sizes &&
+            JSON.parse(product?.sizes).map((item: number) => (
               <span
                 key={item}
                 className="bg-slate-300 rounded-sm text-center p-4 mr-2 my-2 w-[15%]"
@@ -149,7 +152,7 @@ function Product() {
             className="mt-5 p-4 w-[100px] border-slate-300  rounded-sm border-2 mx-5 outline-none"
             type="number"
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={(e) => setQuantity(parseInt(e.target.value))}
           />
           <button
             className="mt-5 p-4 bg-slate-500 rounded-sm text-white mr-5"

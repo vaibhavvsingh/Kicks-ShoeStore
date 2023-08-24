@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { RootState } from "../store/store";
 
 function Account() {
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state: RootState) => state.user);
   const navigate = useNavigate();
 
   useEffect(() => {

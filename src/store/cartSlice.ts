@@ -1,10 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+interface CartItem {
+  brand: string,
+  category: string,
+  desc: string,
+  id: number,
+  img: string,
+  name: string,
+  price: number,
+  productid: number,
+  sizes: string
+  userid: number,
+  quantity: number
+}
+
+const initialState: CartItem[] = [];
+
 const cartSlice = createSlice({
   name: "cart",
-  initialState: [],
+  initialState,
   reducers: {
-    getCart: (state, action) => {
+    getCart: (_state, action) => {
       return action.payload;
     },
     addToCart: (state, action) => {
@@ -13,7 +29,7 @@ const cartSlice = createSlice({
     removeFromCart: (state, action) => {
       return state.filter((item) => item.id !== action.payload);
     },
-    clearCart: (state, action) => {
+    clearCart: () => {
       return [];
     },
   },

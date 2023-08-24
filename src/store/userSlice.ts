@@ -14,7 +14,7 @@ const userSlice = createSlice({
       state.userid = action.payload.userid;
       return state;
     },
-    logout: (state, action) => {
+    logout: (state) => {
       state.isLoggedIn = false;
       state.username = "";
       state.userid = "";

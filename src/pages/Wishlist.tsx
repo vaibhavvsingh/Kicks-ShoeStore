@@ -1,18 +1,19 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeFromWishlist } from "../store/wishlistSlice";
 import { ToastContainer, toast } from "react-toastify";
 import backendUrl from "../static/constants";
+import { RootState } from "../store/store";
 
 function Wishlist() {
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-  const userid = useSelector((state) => state.user.userid);
-  const items = useSelector((state) => state.wishlist);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const userid = useSelector((state: RootState) => state.user.userid);
+  const items = useSelector((state: RootState) => state.wishlist);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  async function removeWishlistItem(id) {
+  async function removeWishlistItem(id: number) {
     const response = await fetch(backendUrl + "wishlist", {
       method: "delete",
       credentials: "include",
