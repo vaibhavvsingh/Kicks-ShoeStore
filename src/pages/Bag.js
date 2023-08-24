@@ -1,23 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearCart, removeFromCart } from "../store/cartSlice";
 import { ToastContainer, toast } from "react-toastify";
+import useRazorpay from "react-razorpay";
 import backendUrl from "../static/constants";
-
-function loadScript(src) {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = src;
-    document.body.appendChild(script);
-    script.onload = () => {
-      resolve(true);
-    };
-    script.onerror = () => {
-      resolve(false);
-    };
-  });
-}
 
 function Bag() {
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -25,6 +12,7 @@ function Bag() {
   const items = useSelector((state) => state.cart);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [Razorpay] = useRazorpay();
 
   async function removeCartItem(id) {
     const response = await fetch(backendUrl + "cart", {
@@ -53,28 +41,20 @@ function Bag() {
     // eslint-disable-next-line
   }, []);
 
-  async function deleteAllItems() {
-    const res = await fetch(backendUrl + "cart/all", {
-      method: "delete",
-      credentials: "include",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userid,
-      }),
-    });
-    if (res.status === 200) dispatch(clearCart());
-  }
-  async function displayRazorpay() {
-    const res = await loadScript(
-      "https://checkout.razorpay.com/v1/checkout.js"
-    );
-
-    if (!res) {
-      alert("Razorpay SDK failed to load. Please check if your online");
-      return;
+  const handlePayment = useCallback(async () => {
+    async function deleteAllItems() {
+      const res = await fetch(backendUrl + "cart/all", {
+        method: "delete",
+        credentials: "include",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userid,
+        }),
+      });
+      if (res.status === 200) dispatch(clearCart());
     }
 
     const response = await fetch(backendUrl + "razorpay", {
@@ -105,9 +85,9 @@ function Bag() {
         deleteAllItems();
       },
     };
-    const paymentObject = new window.Razorpay(options);
+    const paymentObject = new Razorpay(options);
     paymentObject.open();
-  }
+  }, [Razorpay, userid, dispatch]);
 
   if (!items || !items.length) {
     return <div className="text-center mt-4 text-2xl">CART IS EMPTY!</div>;
@@ -150,7 +130,7 @@ function Bag() {
         <h1 className="text-2xl font-semibold">CHECK OUT</h1>
         <button
           className="text-white bg-black p-2 rounded-sm mt-4"
-          onClick={displayRazorpay}
+          onClick={handlePayment}
         >
           Pay ₹
           {items && Array.isArray(items) && items.length !== 0

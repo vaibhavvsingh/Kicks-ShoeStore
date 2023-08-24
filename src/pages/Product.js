@@ -89,24 +89,7 @@ function Product() {
         const tempWishlist = wishlist.filter(
           (item) => item.productid === product.id
         );
-        if (tempWishlist.length !== 0) {
-          dispatch(
-            getWishlist(
-              wishlist.map((item) => {
-                if (item.productid === tempWishlist[0].productid) {
-                  return {
-                    ...product,
-                    userid: user.userid,
-                    productid: product.id,
-                    quantity,
-                  };
-                } else {
-                  return item;
-                }
-              })
-            )
-          );
-        } else {
+        if (tempWishlist.length === 0) {
           dispatch(
             getWishlist([
               ...wishlist,
