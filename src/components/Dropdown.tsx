@@ -41,7 +41,7 @@ function Dropdown({ dropdown }:DropdownProps) {
         {!isLoggedIn ? (
           <Link to="/login">SIGN IN/JOIN</Link>
         ) : (
-          <p onClick={logoutHandle}></p>
+          <p onClick={logoutHandle}>LOGOUT</p>
         )}
       </div>
       <hr />
