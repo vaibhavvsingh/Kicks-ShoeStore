@@ -7,14 +7,14 @@ import backendUrl from "../static/constants";
 import { RootState } from "../store/store";
 
 export interface Product {
-  brand: string,
-  category: string,
-  desc: string,
-  id: number,
-  img: string,
-  name: string,
-  price: number,
-  sizes: string
+  brand: string;
+  category: string;
+  desc: string;
+  id: number;
+  img: string;
+  name: string;
+  price: number;
+  sizes: string;
 }
 
 function Home() {
@@ -41,16 +41,17 @@ function Home() {
           position: toast.POSITION.BOTTOM_CENTER,
         });
     } catch (err) {
-      if(err instanceof Error)
-      toast("Could not fetch Products data.\n" + err?.message, {
-        position: toast.POSITION.BOTTOM_CENTER,
-      });
+      if (err instanceof Error)
+        toast("Could not fetch Products data.\n" + err?.message, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      console.error(err);
     }
   }, [page, searchText]);
 
   const observer = useRef<IntersectionObserver>();
   const scrollerRef = useCallback(
-    (node:HTMLDivElement) => {
+    (node: HTMLDivElement) => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
